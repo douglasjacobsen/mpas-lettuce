@@ -1,0 +1,30 @@
+To install (On Ubuntu):
+
+	Setup PIP:
+		sudo apt-get install pip
+
+	Setup Lettuce:
+		sudo -E pip install lettuce
+		sudo -E C_INCLUDE_PATH=/usr/include/mpi pip install netcdf4
+
+Layout:
+	Within this repository, each core gets it's own directory, with it's own
+	feature and task definitions. The task directory contains shared tasks 
+	that all cores should be able to use.
+	
+	Task files from the root of the features directory should be symlinked 
+	into each of the component directories.
+
+To use:
+	You can edit the lettuce.config script to point to two separate
+	repositories and branches on each repository. Once the config file is 
+	setup properly, lettuce can be run as in `lettuce features/ocean` test 
+	all of the pre-defined features the ocean should have.
+
+	Both repositories and branches are cloned and build separately. Test 
+	cases for each version are downloaded separately as well.
+
+	Tests are run in separate directories for each version of the 
+	repository, and compared (if required by a scenario in defined in the 
+	features).
+
