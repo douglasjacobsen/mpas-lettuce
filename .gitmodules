@@ -1,3 +1,4 @@
 [submodule "features/ocean"]
 	path = features/ocean
 	url = git@github.com:douglasjacobsen/mpas-lettuce-ocean.git
+	branch = master

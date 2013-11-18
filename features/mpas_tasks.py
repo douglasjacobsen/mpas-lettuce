@@ -281,7 +281,7 @@ def compute_rms(step, variable):
 @step('I see "([^"]*)" RMS of 0')#{{{
 def check_rms_values(step, variable):
 	if world.num_runs == 2:
-		assert world.rms_values[variable][0] == 0.0, '%s RMS failed.'%variable
+		assert world.rms_values[variable][0] == 0.0, '%s RMS failed with value %s'%(variable, world.rms_values[variable][0])
 	else:
 		print 'Less than two runs. Skipping RMS check.'#}}}
 
@@ -289,9 +289,9 @@ def check_rms_values(step, variable):
 def clean_test(step):
 	command = "rm"
 	arg1 = "-rf"
-	arg2 = "%s/trusted_test/%s"%(world.basedir,world.test)
+	arg2 = "%s/trusted_tests/%s"%(world.basedir,world.test)
 	subprocess.call([command, arg1, arg2], stdout=dev_null, stderr=dev_null)
 	command = "rm"
 	arg1 = "-rf"
-	arg2 = "%s/testing_test/%s"%(world.basedir,world.test)
+	arg2 = "%s/testing_tests/%s"%(world.basedir,world.test)
 	subprocess.call([command, arg1, arg2], stdout=dev_null, stderr=dev_null)#}}}
