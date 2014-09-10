@@ -2,3 +2,6 @@
 	path = features/ocean
 	url = git@github.com:douglasjacobsen/mpas-lettuce-ocean.git
 	branch = master
+[submodule "features/landice"]
+	path = features/landice
+	url = git@github.com:matthewhoffman/mpas-lettuce-landice.git
