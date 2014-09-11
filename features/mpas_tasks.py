@@ -34,14 +34,24 @@ def seconds_to_timestamp(seconds):#{{{
 
 @step(u'Given A setup test environment')#{{{
 def given_a_setup_test_environment(step):
-	if not os.path.exists("%s/lettuce.config"%os.getcwd()):
-		print "Please copy lettuce.config into the current directory %s"%(os.getcwd())
+
+	calling_file = step.scenario.feature.described_at.file # get the path to the feature that called this step
+	if '/ocean/' in calling_file:
+		world.configfile = 'lettuce.ocean'
+	elif '/landice/' in calling_file:
+		world.configfile = 'lettuce.landice'
+	else:
+		print "Error: Unknown MPAS core was requested."
+		exit()
+
+	if not os.path.exists("%s/%s"%(os.getcwd(), world.configfile)):
+		print "Please copy %s into the current directory %s"%(world.configfile, os.getcwd())
 		print " and configure appropriately for your tests."
 		print ""
 		exit()
 
 	configParser = ConfigParser.SafeConfigParser()
-	configParser.read('lettuce.config')
+	configParser.read(world.configfile)
 	
 	world.compiler = configParser.get("building", "compiler")
 	world.core = configParser.get("building", "core")

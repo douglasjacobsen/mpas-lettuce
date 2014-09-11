@@ -1,0 +1,14 @@
+[building]
+compiler = gfortran
+core = landice
+
+[trusted_repo]
+url = git@github.com:MPAS-Dev/MPAS-Release.git
+branch = master
+test_cases_url = http://oceans11.lanl.gov/mpas_data/mpas_landice/test_cases/release_2.0
+
+[testing_repo]
+url = git@github.com:MPAS-Dev/MPAS-Release.git
+branch = master
+test_cases_url = http://oceans11.lanl.gov/mpas_data/mpas_landice/test_cases/release_2.0
+

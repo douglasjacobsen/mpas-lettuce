@@ -16,10 +16,11 @@ Layout:
 	into each of the component directories.
 
 To use:
-	You can edit the lettuce.config script to point to two separate
+	You can edit the lettuce.CORE script to point to two separate
 	repositories and branches on each repository. Once the config file is 
-	setup properly, lettuce can be run as in `lettuce features/ocean` test 
-	all of the pre-defined features the ocean should have.
+	setup properly, lettuce can be run as in `lettuce features/CORE` test 
+	all of the pre-defined features the chosen CORE should have.  
+        Currently supported cores are 'ocean' and 'landice'.
 
 	Both repositories and branches are cloned and build separately. Test 
 	cases for each version are downloaded separately as well.
