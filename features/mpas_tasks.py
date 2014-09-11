@@ -139,6 +139,7 @@ def run_mpas(step, procs, executable):
 	if world.num_runs == 0:
 		world.num_runs = 1
 		world.run1 = "%s/%s"%(rundir, arg2)
+		world.run1dir = rundir
 		try:
 			del world.rms_values
 			world.rms_values = defaultdict(list)
@@ -147,6 +148,7 @@ def run_mpas(step, procs, executable):
 	elif world.num_runs == 1:
 		world.num_runs = 2
 		world.run2 = "%s/%s"%(rundir, arg2)
+		world.run2dir = rundir
 	os.chdir(world.basedir)#}}}
 
 @step('A (\d+) processor MPAS  "([^"]*)" run with restart')#{{{
@@ -242,6 +244,7 @@ def run_mpas_with_restart(step, procs, executable):
 	if world.num_runs == 0:
 		world.num_runs = 1
 		world.run1 = "%s/%s"%(rundir,arg2)
+		world.run1dir = rundir
 		try:
 			del world.rms_values
 			world.rms_values = defaultdict(list)
@@ -250,6 +253,7 @@ def run_mpas_with_restart(step, procs, executable):
 	elif world.num_runs == 1:
 		world.num_runs = 2
 		world.run2 = "%s/%s"%(rundir,arg2)
+		world.run2dir = rundir
 	os.chdir(world.basedir)#}}}
 
 @step('I compute the RMS of "([^"]*)"')#{{{
