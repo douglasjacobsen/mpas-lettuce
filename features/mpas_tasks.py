@@ -32,8 +32,8 @@ def seconds_to_timestamp(seconds):#{{{
 	timestamp = "%4.4d_%2.2d:%2.2d:%2.2d"%(days, hours, minutes, seconds)
 	return timestamp#}}}
 
-@step(u'Given A setup test environment')#{{{
-def given_a_setup_test_environment(step):
+@step(u'A setup test environment')#{{{
+def setup_test_environment(step):
 
 	calling_file = step.scenario.feature.described_at.file # get the path to the feature that called this step
 	if '/ocean/' in calling_file:
@@ -103,7 +103,7 @@ def given_a_setup_test_environment(step):
 
 	print "/n"
 
-@step('A (\d+) processor MPAS "([^"]*)" run')#{{{
+@step('I perform a (\d+) processor MPAS "([^"]*)" run')#{{{
 def run_mpas(step, procs, executable):
 
 	if executable.find("testing") >= 0:
@@ -148,7 +148,7 @@ def run_mpas(step, procs, executable):
 		world.run2dir = rundir
 	os.chdir(world.basedir)#}}}
 
-@step('A (\d+) processor MPAS  "([^"]*)" run with restart')#{{{
+@step('I perform a (\d+) processor MPAS  "([^"]*)" run with restart')#{{{
 def run_mpas_with_restart(step, procs, executable):
 	if executable.find("testing") >= 0:
 		rundir = "%s/testing_tests/%s"%(world.basedir, world.test)
