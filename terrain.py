@@ -12,5 +12,8 @@ def teardown_some_scenario(scenario):
 
       # reset to world.basedir so the next scenario can work
       # in case we erred and were left stranded elsewhere
-      os.chdir(world.basedir)
+      try:
+        os.chdir(world.basedir)
+      except:
+        pass  # In some cases, if lettuce didn't get very far, world.basedir is not defined yet.
 
