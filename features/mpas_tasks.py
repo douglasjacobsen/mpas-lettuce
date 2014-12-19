@@ -55,66 +55,53 @@ def given_a_setup_test_environment(step):
 	
 	world.compiler = configParser.get("building", "compiler")
 	world.core = configParser.get("building", "core")
+	if configParser.has_option("building", "flags"):
+		world.build_flags = configParser.get("building", "flags")
+	else:
+		world.build_flags = ""
 	world.testing_url = configParser.get("testing_repo", "test_cases_url")
 	world.trusted_url = configParser.get("trusted_repo", "test_cases_url")
 
 	base_dir = os.getcwd()
 
-	# Clone trusted repo
-	if not os.path.exists("%s/%s"%(base_dir, "trusted")):
-		print "Clone trusted version. "
-		command = "git"
-		arg1 = "clone"
-		arg2 = "%s"%configParser.get("trusted_repo", "url")
-		arg3 = "trusted"
-		subprocess.call([command, arg1, arg2, arg3], stdout=dev_null, stderr=dev_null)
-		os.chdir("%s/trusted"%(base_dir))
-		command = "git"
-		arg1 = "checkout"
-		arg2 = "-b"
-		arg3 = "%s"%configParser.get("trusted_repo", "branch")
-		arg4 = "origin/%s"%configParser.get("trusted_repo", "branch")
-		subprocess.call([command, arg1, arg2, arg3, arg4], stdout=dev_null, stderr=dev_null)
-		os.chdir("%s"%(base_dir))
+	# Setup both "trusted" and "testing" code directories.  This loop ensures they are setup identically.
+	for testtype in ('trusted', 'testing'):
 
-	# Build trusted executable
-	if not os.path.exists("%s/trusted/%s_model"%(base_dir, world.core)):
-		print "Build trusted version. "
-		os.chdir("%s/trusted"%(base_dir))
-		command = "make"
-		arg1 = "%s"%world.compiler
-		arg2 = "CORE=%s"%world.core
-		subprocess.call([command, arg1, arg2], stdout=dev_null, stderr=dev_null)
-		world.trusted_executable = "%s/%s_model"%(os.getcwd(), world.core)
-		os.chdir("%s"%(base_dir))
+		# Clone repo
+		# MH: Below I've switched to checkout a detached head rather than making a local branch.
+		# Making a local branch failed if the branch name already existed (i.e., with 'master' which is automatically created during the clone)
+		if not os.path.exists("%s/%s"%(base_dir, testtype)):
+			print "Clone " + testtype + " version. "
+			command = "git"
+			arg1 = "clone"
+			arg2 = "%s"%configParser.get(testtype+"_repo", "url")
+			arg3 = testtype
+			subprocess.check_call([command, arg1, arg2, arg3], stdout=dev_null, stderr=dev_null)
+			os.chdir("%s/%s"%(base_dir, testtype))
+			command = "git"
+			arg1 = "checkout"
+			arg2 = "origin/%s"%configParser.get(testtype+"_repo", "branch")
+			subprocess.check_call([command, arg1, arg2], stdout=dev_null, stderr=dev_null)  # this version checks out a detached head
+			os.chdir("%s"%(base_dir))
 
-	# Clone testing repo
-	if not os.path.exists("%s/%s"%(base_dir, "testing")):
-		print "Clone testing version. "
-		command = "git"
-		arg1 = "clone"
-		arg2 = "%s"%configParser.get("testing_repo", "url")
-		arg3 = "testing"
-		subprocess.call([command, arg1, arg2, arg3], stdout=dev_null, stderr=dev_null)
-		os.chdir("%s/testing"%(base_dir))
-		command = "git"
-		arg1 = "checkout"
-		arg2 = "-b"
-		arg3 = "%s"%configParser.get("testing_repo", "branch")
-		arg4 = "origin/%s"%configParser.get("testing_repo", "branch")
-		subprocess.call([command, arg1, arg2, arg3, arg4], stdout=dev_null, stderr=dev_null)
-		os.chdir("%s"%(base_dir))
+		# Build executable
+		if not os.path.exists("%s/%s/%s_model"%(base_dir, testtype, world.core)):
+			print "Build " + testtype + " version. "
+			os.chdir("%s/%s"%(base_dir, testtype))
+			args = ["make",]
+			args.append("%s"%world.compiler)
+			args.append("CORE=%s"%world.core)
+			# Add any optional build flags specified, but don't add empty strings cause subprocess doesn't like them.
+			for argstring in [x for x in world.build_flags.split(" ") if x]:  # this list comprehension ignores empty strings because the emptry string is 'falsy' in python.
+				args.append(argstring)
+			subprocess.check_call(args, stdout=dev_null, stderr=dev_null)
+			if testtype == 'trusted':
+				world.trusted_executable = "%s/%s_model"%(os.getcwd(), world.core)
+			elif testtype == 'testing':
+				world.testing_executable = "%s/%s_model"%(os.getcwd(), world.core)
+			os.chdir("%s"%(base_dir))
 
-	# Build testing executable
-	if not os.path.exists("%s/testing/%s_model"%(base_dir, world.core)):
-		print "Build testing version. "
-		os.chdir("%s/testing"%(base_dir))
-		command = "make"
-		arg1 = "%s"%world.compiler
-		arg2 = "CORE=%s"%world.core
-		subprocess.call([command, arg1, arg2], stdout=dev_null, stderr=dev_null)
-		world.testing_executable = "%s/%s_model"%(os.getcwd(), world.core)
-		os.chdir("%s"%(base_dir))#}}}
+	print "/n"
 
 @step('A (\d+) processor MPAS "([^"]*)" run')#{{{
 def run_mpas(step, procs, executable):
