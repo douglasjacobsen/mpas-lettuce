@@ -1,17 +1,19 @@
 [building]
 compiler = gfortran
 core = landice
-flags = ALBANY=true
+#flags = ALBANY=true
 
 [trusted_repo]
 url = git@github.com:MPAS-Dev/MPAS-Release.git
 branch = master
-#test_cases_url = http://oceans11.lanl.gov/mpas_data/mpas_landice/test_cases/release_2.0
-test_cases_url = https://dl.dropboxusercontent.com/u/30481359/
+#url = git@github.com:MPAS-Dev/MPAS.git
+#branch = landice/develop
+test_cases_url = http://oceans11.lanl.gov/mpas_data/mpas_landice/test_cases/release_3.0
 
 [testing_repo]
-url = git@github.com:matthewhoffman/MPAS.git
-branch = landice/add_extern_dycore_interface_v3
-#test_cases_url = http://oceans11.lanl.gov/mpas_data/mpas_landice/test_cases/release_2.0
-test_cases_url = https://dl.dropboxusercontent.com/u/30481359/
+url = git@github.com:MPAS-Dev/MPAS.git
+branch = landice/develop
+#url = git@github.com:mperego/MPAS.git
+#branch = landice/add_extern_dycore_interface_v3
+test_cases_url = http://oceans11.lanl.gov/mpas_data/mpas_landice/test_cases/release_3.0
 
