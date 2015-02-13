@@ -128,6 +128,9 @@ def setup_test_environment(step):
 				# Set the new remote to be 'origin'
 				subprocess.check_call(['git', 'remote', 'remove', 'origin'], stdout=dev_null, stderr=dev_null)
 				subprocess.check_call(['git', 'remote', 'rename', 'statuscheck', 'origin'], stdout=dev_null, stderr=dev_null)
+                                # Clean the build of the core we're trying to build
+                                print "   -- Running make clean CORE=%s"%configParser.get("building", "core")
+                                subprocess.check_call(['make', 'clean', "CORE=%s"%configParser.get("building", "core")], stdout=dev_null, stderr=dev_null)
 			os.chdir(base_dir) # return to basedir in case not already there
 
 		# Build executable
