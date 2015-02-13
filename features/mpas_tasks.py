@@ -9,6 +9,7 @@ from pylab import *
 from lettuce import *
 
 from collections import defaultdict
+import xml.etree.ElementTree as ET
 
 dev_null = open(os.devnull, 'w')
 
@@ -101,7 +102,7 @@ def setup_test_environment(step):
 				world.testing_executable = "%s/%s_model"%(os.getcwd(), world.core)
 			os.chdir("%s"%(base_dir))
 
-	print "/n"
+	print "/n" #}}}
 
 @step('I perform a (\d+) processor MPAS "([^"]*)" run')#{{{
 def run_mpas(step, procs, executable):
@@ -157,10 +158,11 @@ def run_mpas_with_restart(step, procs, executable):
 
 	os.chdir(rundir)
 
+        #{{{ Setup initial namelist
 	duration = seconds_to_timestamp(world.dt)
 	final_time = seconds_to_timestamp(world.dt + 24*3600)
 
-	namelistfile = open('namelist.input', 'r+')
+	namelistfile = open(world.namelist, 'r+')
 	lines = namelistfile.readlines()
 	namelistfile.seek(0)
 	namelistfile.truncate()
@@ -170,10 +172,6 @@ def run_mpas_with_restart(step, procs, executable):
 			new_line = "    config_start_time = 'file'\n"
 		elif line.find('config_run_duration') >= 0:
 			new_line = "    config_run_duration = '%s'\n"%duration
-		elif line.find('config_restart_interval') >= 0:
-			new_line = "    config_restart_interval = '0000_00:00:01'\n"
-		elif line.find('config_output_interval') >= 0:
-			new_line = "    config_output_interval = '0000_00:00:01'\n"
 		else:
 			new_line = line
 
@@ -181,10 +179,34 @@ def run_mpas_with_restart(step, procs, executable):
 
 	namelistfile.close()
 	del lines
+        #}}}
 
-	restart_file = open('restart_timestamp', 'w+')
-	restart_file.write('0000-01-01_00:00:00')
-	restart_file.close()
+        #{{{ Setup initial streams file
+        tree = ET.parse(world.streams)        
+        root = tree.getroot()
+
+        # Loop over immutable streams to find restart streams.
+        for stream in root.findall('immutable_stream'):
+            type = stream.get('type')
+
+            if ( type.find("output") != -1 ):
+                stream.set('output_interval', '01')
+
+        # Loop over mutable streams to find restart and output streams
+        for stream in root.findall('stream'):
+            type = stream.get('type')
+            name = stream.get('name')
+
+            if ( type.find("output") != -1 ):
+                stream.set('output_interval', '01')
+
+            if ( name.find("output") != -1 ):
+                stream.set('filename_template', 'output.nc')
+
+        tree.write(world.streams)
+        del tree
+        del root
+        #}}}
 
 	command = "mpirun"
 	arg1 = "-n"
@@ -195,12 +217,8 @@ def run_mpas_with_restart(step, procs, executable):
 	except:
 		os.chdir(world.basedir)  # return to basedir before err'ing.
 		raise
-	command = "rm"
-	arg1 = "-f"
-	arg2 = "output.0000-01-01_00.00.00.nc"
-	subprocess.call([command, arg1, arg2], stdout=dev_null, stderr=dev_null)
 
-	namelistfile = open('namelist.input', 'r+')
+	namelistfile = open(world.namelist, 'r+')
 	lines = namelistfile.readlines()
 	namelistfile.seek(0)
 	namelistfile.truncate()
@@ -208,14 +226,12 @@ def run_mpas_with_restart(step, procs, executable):
 	for line in lines:
 		if line.find('config_do_restart') >= 0:
 			new_line = "    config_do_restart = .true.\n"
-		elif line.find('config_restart_interval') >= 0:
-			new_line = "    config_restart_interval = '1000_00:00:01'\n"
 		else:
 			new_line = line
 
 		namelistfile.write(new_line)
 
-	namelistfile.write("mv output.0000-01-%s.nc %sprocs.restarted.output.nc"%(final_time[2:].replace(":","."), procs))
+	namelistfile.write("mv output.nc %sprocs.restarted.output.nc"%(procs))
 	namelistfile.close()
 	del lines
 
@@ -230,7 +246,7 @@ def run_mpas_with_restart(step, procs, executable):
 		raise
 
 	command = "mv"
-	arg1 = "output.0000-01-%s.nc"%(final_time[2:].replace(":","."))
+	arg1 = "output.nc"
 	arg2 = "%sprocs.restarted.output.nc"%procs
 	try:
 		subprocess.check_call([command, arg1, arg2], stdout=dev_null, stderr=dev_null)
