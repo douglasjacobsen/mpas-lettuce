@@ -35,43 +35,6 @@ def seconds_to_timestamp(seconds):#{{{
 
 @step(u'A setup test environment')#{{{
 def setup_test_environment(step):
-	calling_file = step.scenario.feature.described_at.file # get the path to the feature that called this step
-	if '/ocean/' in calling_file:
-		world.configfile = 'lettuce.ocean'
-	elif '/landice/' in calling_file:
-		world.configfile = 'lettuce.landice'
-	else:
-		print "Error: Unknown MPAS core was requested."
-		exit()
-
-	if not os.path.exists("%s/%s"%(os.getcwd(), world.configfile)):
-		print "Please copy %s into the current directory %s"%(world.configfile, os.getcwd())
-		print " and configure appropriately for your tests."
-		print ""
-		exit()
-
-	configParser = ConfigParser.SafeConfigParser()
-	configParser.read(world.configfile)
-	world.clone = configParser.get("steps", "clone")
-	world.build = configParser.get("steps", "build")
-	world.run = configParser.get("steps", "run")
-
-	world.compiler = configParser.get("building", "compiler")
-	world.core = configParser.get("building", "core")
-	if world.core == "ocean":
-		world.executable = "ocean_forward_model"
-	elif world.core == "landice":
-		world.executable = "landice_model"
-
-	if configParser.has_option("building", "flags"):
-		world.build_flags = configParser.get("building", "flags")
-	else:
-		world.build_flags = ""
-	world.testing_url = configParser.get("testing_repo", "test_cases_url")
-	world.trusted_url = configParser.get("trusted_repo", "test_cases_url")
-
-	base_dir = os.getcwd()
-
 	# Setup both "trusted" and "testing" code directories.  This loop ensures they are setup identically.
 	for testtype in ('trusted', 'testing'):
 
@@ -83,37 +46,37 @@ def setup_test_environment(step):
 			# Making a local branch failed if the branch name already existed (i.e., with 'master' which is automatically created during the clone)
 
 			try:
-				os.chdir("%s/%s"%(base_dir, testtype))
+				os.chdir("%s/%s"%(world.base_dir, testtype))
 				HEAD_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD'], stderr=dev_null)
 				need_to_clone = False # if the dir exists AND we got a hash, then this directory is a git repo
 			except:
 				need_to_clone = True  # if we fail to enter the dir or fail to get a hash then call this directory bad
-			os.chdir(base_dir) # return to basedir in case not already there
+			os.chdir(world.base_dir) # return to basedir in case not already there
 
 			if need_to_clone:
 				need_to_build = True # set this for later - we definitely need to build if we don't even have a clone...
 				# delete dir if it exists
-				if os.path.exists("%s/%s"%(base_dir, testtype)):
-					shutil.rmtree("%s/%s"%(base_dir, testtype))
+				if os.path.exists("%s/%s"%(world.base_dir, testtype)):
+					shutil.rmtree("%s/%s"%(world.base_dir, testtype))
 
 				# Clone repo specified
 				print "Cloning " + testtype + " respository. "
 				command = "git"
 				arg1 = "clone"
-				arg2 = "%s"%configParser.get(testtype+"_repo", "url")
+				arg2 = "%s"%world.configParser.get(testtype+"_repo", "url")
 				arg3 = testtype
 				subprocess.check_call([command, arg1, arg2, arg3], stdout=dev_null, stderr=dev_null)
-				os.chdir("%s/%s"%(base_dir, testtype))
+				os.chdir("%s/%s"%(world.base_dir, testtype))
 				print "Checking out " + testtype + " branch. "
 				command = "git"
 				arg1 = "checkout"
-				arg2 = "origin/%s"%configParser.get(testtype+"_repo", "branch")
+				arg2 = "origin/%s"%world.configParser.get(testtype+"_repo", "branch")
 				subprocess.check_call([command, arg1, arg2], stdout=dev_null, stderr=dev_null)  # this version checks out a detached head
-				os.chdir(base_dir) # return to basedir in case not already there
+				os.chdir(world.base_dir) # return to basedir in case not already there
 
 			# ---- Didn't need to make a new clone -----
 			else:  # We don't need to clone, but that doesn't mean the branch or the executable are up to date
-				os.chdir("%s/%s"%(base_dir, testtype))
+				os.chdir("%s/%s"%(world.base_dir, testtype))
 				# make a temporary remote to get the most current version of the specified repo
 				remotes = subprocess.check_output(['git', 'remote'], stderr=dev_null)
 				if 'statuscheck' in remotes:
@@ -122,10 +85,10 @@ def setup_test_environment(step):
 					print remotes
 					print
 					subprocess.check_call(['git', 'remote', 'rm', 'statuscheck'], stdout=dev_null, stderr=dev_null)
-				subprocess.check_call(['git', 'remote', 'add', 'statuscheck', "%s"%configParser.get(testtype+"_repo", "url")], stdout=dev_null, stderr=dev_null)
+				subprocess.check_call(['git', 'remote', 'add', 'statuscheck', "%s"%world.configParser.get(testtype+"_repo", "url")], stdout=dev_null, stderr=dev_null)
 				subprocess.check_call(['git', 'fetch', 'statuscheck'], stdout=dev_null, stderr=dev_null)
 				# get the hash of the specified branch
-				requested_hash = subprocess.check_output(['git', 'rev-parse', "statuscheck/%s"%configParser.get(testtype+"_repo", "branch")], stderr=dev_null)
+				requested_hash = subprocess.check_output(['git', 'rev-parse', "statuscheck/%s"%world.configParser.get(testtype+"_repo", "branch")], stderr=dev_null)
 				if requested_hash == HEAD_hash:
 					print 'Current ' + testtype + ' clone and branch are up to date.'
 					need_to_build = False
@@ -137,7 +100,7 @@ def setup_test_environment(step):
 					print 'Updating ' + testtype + ' HEAD to specified repository and branch.'
 					need_to_build = True
 					# Checkout the specified branch (as detached head) because it either is a different URL/branch or is newer (or older) than the current detached head
-					subprocess.check_call(['git', 'checkout', "statuscheck/%s"%configParser.get(testtype+"_repo", "branch")], stdout=dev_null, stderr=dev_null)
+					subprocess.check_call(['git', 'checkout', "statuscheck/%s"%world.configParser.get(testtype+"_repo", "branch")], stdout=dev_null, stderr=dev_null)
 					# Set the new remote to be 'origin'
 					remotes = subprocess.check_output(['git', 'remote'], stderr=dev_null)
 					if 'origin' in remotes:
@@ -145,15 +108,15 @@ def setup_test_environment(step):
 					if 'statuscheck' in remotes:
 						subprocess.check_call(['git', 'remote', 'rename', 'statuscheck', 'origin'], stdout=dev_null, stderr=dev_null)
 					# Clean the build of the core we're trying to build
-					print "   -- Running make clean CORE=%s"%configParser.get("building", "core")
-					subprocess.check_call(['make', 'clean', "CORE=%s"%configParser.get("building", "core")], stdout=dev_null, stderr=dev_null)
-				os.chdir(base_dir) # return to basedir in case not already there
+					print "   -- Running make clean CORE=%s"%world.configParser.get("building", "core")
+					subprocess.check_call(['make', 'clean', "CORE=%s"%world.configParser.get("building", "core")], stdout=dev_null, stderr=dev_null)
+				os.chdir(world.base_dir) # return to basedir in case not already there
 
 			if ( world.build == "YES" ):
 				# Build executable
-				if need_to_build or not os.path.exists("%s/%s/%s"%(base_dir, testtype, world.executable)):
+				if need_to_build or not os.path.exists("%s/%s/%s"%(world.base_dir, testtype, world.executable)):
 					print "Building " + testtype + " executable. "
-					os.chdir("%s/%s"%(base_dir, testtype))
+					os.chdir("%s/%s"%(world.base_dir, testtype))
 					args = ["make",]
 					args.append("%s"%world.compiler)
 					args.append("CORE=%s"%world.core)
@@ -165,7 +128,7 @@ def setup_test_environment(step):
 						world.trusted_executable = "%s/%s"%(os.getcwd(), world.executable)
 					elif testtype == 'testing':
 						world.testing_executable = "%s/%s"%(os.getcwd(), world.executable)
-					os.chdir("%s"%(base_dir))
+					os.chdir("%s"%(world.base_dir))
 
 	print '----------------------------'
 	print "/n" #}}}
