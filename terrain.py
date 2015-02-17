@@ -45,18 +45,27 @@ def setup_config(feature):
     world.configParser = ConfigParser.SafeConfigParser()
     world.configParser.read(world.configfile)
 
-    world.clone = world.configParser.get("lettuce_actions", "clone")
-    world.build = world.configParser.get("lettuce_actions", "build")
-    world.run = world.configParser.get("lettuce_actions", "run")
-    if world.clone:
+    if world.configParser.has_option("lettuce_actions", "clone"):
+      world.clone = world.configParser.getboolean("lettuce_actions", "clone")
+    else:
+      world.clone = False
+    if world.configParser.has_option("lettuce_actions", "build"):
+      world.build = world.configParser.getboolean("lettuce_actions", "build")
+    else:
+      world.build = False
+    if world.configParser.has_option("lettuce_actions", "run"):
+      world.run = world.configParser.getboolean("lettuce_actions", "run")
+    else:
+      world.run = False
+    if world.clone == True:
       print 'Lettuce will clone MPAS if needed.'
     else:
       print 'Lettuce will NOT attempt to clone MPAS.'
-    if world.build:
+    if world.build == True:
       print 'Lettuce will build MPAS if needed.'
     else:
       print 'Lettuce will NOT attempt to build MPAS.'
-    if world.run:
+    if world.run == True:
       print 'Lettuce will run MPAS.'
     else:
       print 'Lettuce will NOT attempt to run MPAS.'
@@ -82,7 +91,7 @@ def setup_config(feature):
     for testtype in ('trusted', 'testing'):
         need_to_build = False
 
-        if ( world.clone == "YES" ):
+        if ( world.clone == True ):
             print '----------------------------'
 
             # Clone repo
@@ -155,7 +164,7 @@ def setup_config(feature):
 
                     os.chdir(world.base_dir) # return to basedir in case not already there
 
-            if ( world.build == "YES" ):
+            if ( world.build == True ):
                 # Build executable
                 if need_to_build or not os.path.exists("%s/%s/%s"%(world.base_dir, testtype, world.executable)):
                     print "Building " + testtype + " executable."

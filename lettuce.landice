@@ -1,7 +1,10 @@
 [lettuce_actions]
-clone = YES
-build = YES
-run = YES
+# To turn these on use any of: "1", "yes", "true", and "on"
+# To turn these off simply comment out the line OR use any of: "0", "no", "false", and "off"
+# Values here are case insensitive but there should be no whitespace after the =
+clone=yes
+build=yes
+run=yes
 
 [building]
 compiler = gfortran
@@ -20,5 +23,5 @@ url = git@github.com:MPAS-Dev/MPAS.git
 branch = landice/develop
 #url = git@github.com:mperego/MPAS.git
 #branch = landice/add_extern_dycore_interface_v3
-test_cases_url = http://oceans11.lanl.gov/mpas_data/mpas_landice/test_cases/release_3.0
+test_cases_url = http://oceans11.lanl.gov/mpas_data/mpas_landice/test_cases/staging
 

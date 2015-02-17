@@ -36,7 +36,7 @@ def seconds_to_timestamp(seconds):#{{{
 @step('I perform a (\d+) processor MPAS "([^"]*)" run')#{{{
 def run_mpas(step, procs, executable):
 
-	if ( world.run == "YES" ):
+	if ( world.run == True ):
 		if executable.find("testing") >= 0:
 			rundir = "%s/testing_tests/%s"%(world.basedir, world.test)
 		elif executable.find("trusted") >= 0:
@@ -82,7 +82,7 @@ def run_mpas(step, procs, executable):
 @step('I perform a (\d+) processor MPAS  "([^"]*)" run with restart')#{{{
 def run_mpas_with_restart(step, procs, executable):
 
-	if ( world.run == "YES" ):
+	if ( world.run == True ):
 		if executable.find("testing") >= 0:
 			rundir = "%s/testing_tests/%s"%(world.basedir, world.test)
 		elif executable.find("trusted") >= 0:
@@ -203,7 +203,7 @@ def run_mpas_with_restart(step, procs, executable):
 
 @step('I compute the RMS of "([^"]*)"')#{{{
 def compute_rms(step, variable):
-	if ( world.run == "YES" ):
+	if ( world.run == True ):
 		if world.num_runs == 2:
 			f1 = NetCDFFile("%s"%(world.run1),'r')
 			f2 = NetCDFFile("%s"%(world.run2),'r')
