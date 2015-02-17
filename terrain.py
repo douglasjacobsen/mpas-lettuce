@@ -59,6 +59,8 @@ def setup_config(feature):
     elif ( world.core == "landice" ):
         world.executable = "landice_model"
 
+    print ' '
+
     # Setup both "trusted" and "testing" code directories.  This loop ensures they are setup identically.
     for testtype in ('trusted', 'testing'):
         need_to_build = False
@@ -86,14 +88,14 @@ def setup_config(feature):
                     shutil.rmtree("%s/%s"%(world.base_dir, testtype))
 
                 # Clone repo specified
-                print "Cloning " + testtype + " respository. "
+                print "Cloning " + testtype + " repository."
                 command = "git"
                 arg1 = "clone"
                 arg2 = "%s"%world.configParser.get(testtype+"_repo", "url")
                 arg3 = testtype
                 subprocess.check_call([command, arg1, arg2, arg3], stdout=dev_null, stderr=dev_null)
                 os.chdir("%s/%s"%(world.base_dir, testtype))
-                print "Checking out " + testtype + " branch. "
+                print "Checking out " + testtype + " branch."
                 command = "git"
                 arg1 = "checkout"
                 arg2 = "origin/%s"%world.configParser.get(testtype+"_repo", "branch")
@@ -108,38 +110,38 @@ def setup_config(feature):
                 if 'statuscheck' in remotes:
                     # need to delete this remote first
                     subprocess.check_call(['git', 'remote', 'rm', 'statuscheck'], stdout=dev_null, stderr=dev_null)
-                    subprocess.check_call(['git', 'remote', 'add', 'statuscheck', "%s"%world.configParser.get(testtype+"_repo", "url")], stdout=dev_null, stderr=dev_null)
-                    subprocess.check_call(['git', 'fetch', 'statuscheck'], stdout=dev_null, stderr=dev_null)
-                    # get the hash of the specified branch
-                    requested_hash = subprocess.check_output(['git', 'rev-parse', "statuscheck/%s"%world.configParser.get(testtype+"_repo", "branch")], stderr=dev_null)
-                    if requested_hash == HEAD_hash:
-                        print 'Current ' + testtype + ' clone and branch are up to date.'
-                        need_to_build = False
-                        # Now remove the remote
-                        remotes = subprocess.check_output(['git', 'remote'], stderr=dev_null)
-                        if 'statuscheck' in remotes:
-                            subprocess.check_call(['git', 'remote', 'rm', 'statuscheck'], stdout=dev_null, stderr=dev_null)
-                    else:
-                        print 'Updating ' + testtype + ' HEAD to specified repository and branch.'
-                        need_to_build = True
-                        # Checkout the specified branch (as detached head) because it either is a different URL/branch or is newer (or older) than the current detached head
-                        subprocess.check_call(['git', 'checkout', "statuscheck/%s"%world.configParser.get(testtype+"_repo", "branch")], stdout=dev_null, stderr=dev_null)
-                        # Set the new remote to be 'origin'
-                        remotes = subprocess.check_output(['git', 'remote'], stderr=dev_null)
-                        if 'origin' in remotes:
-                            subprocess.check_call(['git', 'remote', 'rm', 'origin'], stdout=dev_null, stderr=dev_null)
-                        if 'statuscheck' in remotes:
-                            subprocess.check_call(['git', 'remote', 'rename', 'statuscheck', 'origin'], stdout=dev_null, stderr=dev_null)
-                        # Clean the build of the core we're trying to build
-                        print "   -- Running make clean CORE=%s"%world.configParser.get("building", "core")
-                        subprocess.check_call(['make', 'clean', "CORE=%s"%world.configParser.get("building", "core")], stdout=dev_null, stderr=dev_null)
+                subprocess.check_call(['git', 'remote', 'add', 'statuscheck', "%s"%world.configParser.get(testtype+"_repo", "url")], stdout=dev_null, stderr=dev_null)
+                subprocess.check_call(['git', 'fetch', 'statuscheck'], stdout=dev_null, stderr=dev_null)
+                # get the hash of the specified branch
+                requested_hash = subprocess.check_output(['git', 'rev-parse', "statuscheck/%s"%world.configParser.get(testtype+"_repo", "branch")], stderr=dev_null)
+                if requested_hash == HEAD_hash:
+                    print 'Current ' + testtype + ' clone and branch are up to date.'
+                    need_to_build = False
+                    # Now remove the remote
+                    remotes = subprocess.check_output(['git', 'remote'], stderr=dev_null)
+                    if 'statuscheck' in remotes:
+                        subprocess.check_call(['git', 'remote', 'rm', 'statuscheck'], stdout=dev_null, stderr=dev_null)
+                else:
+                    print 'Updating ' + testtype + ' HEAD to specified repository and branch.'
+                    need_to_build = True
+                    # Checkout the specified branch (as detached head) because it either is a different URL/branch or is newer (or older) than the current detached head
+                    subprocess.check_call(['git', 'checkout', "statuscheck/%s"%world.configParser.get(testtype+"_repo", "branch")], stdout=dev_null, stderr=dev_null)
+                    # Set the new remote to be 'origin'
+                    remotes = subprocess.check_output(['git', 'remote'], stderr=dev_null)
+                    if 'origin' in remotes:
+                        subprocess.check_call(['git', 'remote', 'rm', 'origin'], stdout=dev_null, stderr=dev_null)
+                    if 'statuscheck' in remotes:
+                        subprocess.check_call(['git', 'remote', 'rename', 'statuscheck', 'origin'], stdout=dev_null, stderr=dev_null)
+                    # Clean the build of the core we're trying to build
+                    print "   -- Running make clean CORE=%s"%world.configParser.get("building", "core")
+                    subprocess.check_call(['make', 'clean', "CORE=%s"%world.configParser.get("building", "core")], stdout=dev_null, stderr=dev_null)
 
                     os.chdir(world.base_dir) # return to basedir in case not already there
 
             if ( world.build == "YES" ):
                 # Build executable
                 if need_to_build or not os.path.exists("%s/%s/%s"%(world.base_dir, testtype, world.executable)):
-                    print "Building " + testtype + " executable. "
+                    print "Building " + testtype + " executable."
                     os.chdir("%s/%s"%(world.base_dir, testtype))
                     args = ["make",]
                     args.append("%s"%world.compiler)
@@ -157,7 +159,6 @@ def setup_config(feature):
                     os.chdir("%s"%(world.base_dir))
 
     print '----------------------------'
-    print "/n" #}}}
 #}}}
 
 @before.each_step#{{{
