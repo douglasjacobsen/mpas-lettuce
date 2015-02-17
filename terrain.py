@@ -18,10 +18,15 @@ def check_environment():
     if not os.environ.has_key("PIO"):
         print "Error: The PIO environment variable must be defined to use MPAS"
         exit()
+
+    world.feature_count = 0
 #}}}
 
 @before.each_feature#{{{
 def setup_config(feature):
+  world.feature_count += 1
+  if world.feature_count == 1:  # the clone/checkout/build actions should only happen before the first feature
+
     calling_file = feature.described_at.file # get the path to the feature that called this step
     if '/ocean/' in calling_file:
         world.configfile = 'lettuce.ocean'
@@ -40,10 +45,22 @@ def setup_config(feature):
     world.configParser = ConfigParser.SafeConfigParser()
     world.configParser.read(world.configfile)
 
-    world.clone = world.configParser.get("steps", "clone")
-    world.build = world.configParser.get("steps", "build")
-    world.run = world.configParser.get("steps", "run")
-    
+    world.clone = world.configParser.get("lettuce_actions", "clone")
+    world.build = world.configParser.get("lettuce_actions", "build")
+    world.run = world.configParser.get("lettuce_actions", "run")
+    if world.clone:
+      print 'Lettuce will clone MPAS if needed.'
+    else:
+      print 'Lettuce will NOT attempt to clone MPAS.'
+    if world.build:
+      print 'Lettuce will build MPAS if needed.'
+    else:
+      print 'Lettuce will NOT attempt to build MPAS.'
+    if world.run:
+      print 'Lettuce will run MPAS.'
+    else:
+      print 'Lettuce will NOT attempt to run MPAS.'
+
     world.compiler = world.configParser.get("building", "compiler")
     world.core = world.configParser.get("building", "core")
     if world.configParser.has_option("building", "flags"):

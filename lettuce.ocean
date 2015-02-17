@@ -1,4 +1,4 @@
-[steps]
+[lettuce_actions]
 clone = YES
 build = YES
 run = YES
