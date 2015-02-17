@@ -210,12 +210,16 @@ def compute_rms(step, variable):
 		if world.num_runs == 2:
 			f1 = NetCDFFile("%s"%(world.run1),'r')
 			f2 = NetCDFFile("%s"%(world.run2),'r')
+			if len(f1.dimensions['Time']) == 1:
+				timeindex = 0
+			else:
+				timeindex = -1
 			if len(f1.variables["%s"%variable].shape) == 3:
-				field1 = f1.variables["%s"%variable][-1,:,:]
-				field2 = f2.variables["%s"%variable][-1,:,:]
+				field1 = f1.variables["%s"%variable][timeindex,:,:]
+				field2 = f2.variables["%s"%variable][timeindex,:,:]
 			elif len(f1.variables["%s"%variable].shape) == 2:
-				field1 = f1.variables["%s"%variable][-1,:]
-				field2 = f2.variables["%s"%variable][-1,:]
+				field1 = f1.variables["%s"%variable][timeindex,:]
+				field2 = f2.variables["%s"%variable][timeindex,:]
 			else:
 				assert False, "Unexpected number of dimensions in output file."
 
