@@ -31,7 +31,8 @@ def seconds_to_timestamp(seconds):#{{{
 		seconds = seconds - int(minutes*60)
 
 	timestamp = "%4.4d_%2.2d:%2.2d:%2.2d"%(days, hours, minutes, seconds)
-	return timestamp#}}}
+	return timestamp
+#}}}
 
 @step('I perform a (\d+) processor MPAS "([^"]*)" run')#{{{
 def run_mpas(step, procs, executable):
@@ -77,7 +78,8 @@ def run_mpas(step, procs, executable):
 			world.num_runs = 2
 			world.run2 = "%s/%s"%(rundir, arg2)
 			world.run2dir = rundir
-		os.chdir(world.basedir)#}}}
+		os.chdir(world.basedir)
+#}}}
 
 @step('I perform a (\d+) processor MPAS  "([^"]*)" run with restart')#{{{
 def run_mpas_with_restart(step, procs, executable):
@@ -90,7 +92,7 @@ def run_mpas_with_restart(step, procs, executable):
 
 		os.chdir(rundir)
 
-			#{{{ Setup initial namelist
+		#{{{ Setup initial namelist
 		duration = seconds_to_timestamp(world.dt)
 		final_time = seconds_to_timestamp(world.dt + 24*3600)
 
@@ -101,9 +103,9 @@ def run_mpas_with_restart(step, procs, executable):
 
 		for line in lines:
 			if line.find('config_start_time') >= 0:
-				new_line = "    config_start_time = 'file'\n"
+				new_line = "	config_start_time = 'file'\n"
 			elif line.find('config_run_duration') >= 0:
-				new_line = "    config_run_duration = '%s'\n"%duration
+				new_line = "	config_run_duration = '%s'\n"%duration
 			else:
 				new_line = line
 
@@ -157,7 +159,7 @@ def run_mpas_with_restart(step, procs, executable):
 
 		for line in lines:
 			if line.find('config_do_restart') >= 0:
-				new_line = "    config_do_restart = .true.\n"
+				new_line = "	config_do_restart = .true.\n"
 			else:
 				new_line = line
 
@@ -199,7 +201,8 @@ def run_mpas_with_restart(step, procs, executable):
 			world.num_runs = 2
 			world.run2 = "%s/%s"%(rundir,arg2)
 			world.run2dir = rundir
-		os.chdir(world.basedir)#}}}
+		os.chdir(world.basedir)
+#}}}
 
 @step('I compute the RMS of "([^"]*)"')#{{{
 def compute_rms(step, variable):
@@ -226,7 +229,8 @@ def compute_rms(step, variable):
 			f2.close()
 			os.chdir(world.basedir)
 		else:
-			print 'Less than two runs. Skipping RMS computation.'#}}}
+			print 'Less than two runs. Skipping RMS computation.'
+#}}}
 
 @step('I see "([^"]*)" RMS of 0')#{{{
 def check_rms_values(step, variable):
@@ -234,7 +238,8 @@ def check_rms_values(step, variable):
 		if world.num_runs == 2:
 			assert world.rms_values[variable][0] == 0.0, '%s RMS failed with value %s'%(variable, world.rms_values[variable][0])
 		else:
-			print 'Less than two runs. Skipping RMS check.'#}}}
+			print 'Less than two runs. Skipping RMS check.'
+#}}}
 
 @step('I clean the test directory')#{{{
 def clean_test(step):
@@ -246,4 +251,5 @@ def clean_test(step):
 		command = "rm"
 		arg1 = "-rf"
 		arg2 = "%s/testing_tests/%s"%(world.basedir,world.test)
-		subprocess.call([command, arg1, arg2], stdout=dev_null, stderr=dev_null)#}}}
+		subprocess.call([command, arg1, arg2], stdout=dev_null, stderr=dev_null)
+#}}}
