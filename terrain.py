@@ -139,7 +139,10 @@ def setup_config(feature):
 					subprocess.check_call(['git', 'remote', 'add', 'statuscheck', "%s"%world.configParser.get(testtype+"_repo", "url")], stdout=dev_null, stderr=dev_null)
 					subprocess.check_call(['git', 'fetch', 'statuscheck'], stdout=dev_null, stderr=dev_null)
 					# get the hash of the specified branch
-					requested_hash = subprocess.check_output(['git', 'rev-parse', "statuscheck/%s"%world.configParser.get(testtype+"_repo", "branch")], stderr=dev_null)
+					try:
+						requested_hash = subprocess.check_output(['git', 'rev-parse', "statuscheck/%s"%world.configParser.get(testtype+"_repo", "branch")], stderr=dev_null)
+					except:
+						requested_hash = world.configParser.get(testtype+"_repo", "branch")  # perhaps they just specified a hash instead of branch name
 					if requested_hash == HEAD_hash:
 						print 'Current ' + testtype + ' clone and branch are up to date.'
 						need_to_build = False
@@ -151,8 +154,10 @@ def setup_config(feature):
 						print 'Updating ' + testtype + ' HEAD to specified repository and branch.'
 						need_to_build = True
 						# Checkout the specified branch (as detached head) because it either is a different URL/branch or is newer (or older) than the current detached head
-						subprocess.check_call(['git', 'checkout', "statuscheck/%s"%world.configParser.get(testtype+"_repo", "branch")], stdout=dev_null, stderr=dev_null)
-						# Set the new remote to be 'origin'
+						try:
+							subprocess.check_call(['git', 'checkout', requested_hash], stdout=dev_null, stderr=dev_null)
+						except:
+							exit("Lettuce encountered an error in trying to git checkout: " + requested_hash)
 						remotes = subprocess.check_output(['git', 'remote'], stderr=dev_null)
 						if 'origin' in remotes:
 							subprocess.check_call(['git', 'remote', 'rm', 'origin'], stdout=dev_null, stderr=dev_null)
