@@ -111,7 +111,7 @@ def setup_config(feature):
 				except:
 					need_to_clone = True  # if we fail to enter the dir or fail to get a hash then call this directory bad
 
-				os.chdir(world.base_dir) # return to basedir in case not already there
+				os.chdir(world.base_dir) # return to base_dir in case not already there
 
 				if need_to_clone:
 					need_to_build = True # set this for later - we definitely need to build if we don't even have a clone...
@@ -132,7 +132,7 @@ def setup_config(feature):
 					arg1 = "checkout"
 					arg2 = "origin/%s"%world.configParser.get(testtype+"_repo", "branch")
 					subprocess.check_call([command, arg1, arg2], stdout=dev_null, stderr=dev_null)  # this version checks out a detached head
-					os.chdir(world.base_dir) # return to basedir in case not already there
+					os.chdir(world.base_dir) # return to base_dir in case not already there
 
 				# ---- Didn't need to make a new clone -----
 				else:  # We don't need to clone, but that doesn't mean the branch or the executable are up to date
@@ -179,7 +179,7 @@ def setup_config(feature):
 						print "   -- Running make clean CORE=%s"%world.configParser.get("building", "core")
 						subprocess.check_call(['make', 'clean', "CORE=%s"%world.configParser.get("building", "core")], stdout=dev_null, stderr=dev_null)
 
-						os.chdir(world.base_dir) # return to basedir in case not already there
+						os.chdir(world.base_dir) # return to base_dir in case not already there
 
 				if ( world.build == True ):
 					# Build executable
@@ -219,11 +219,11 @@ def teardown_some_scenario(scenario):
 	  except:
 		pass
 
-	  # reset to world.basedir so the next scenario can work
+	  # reset to world.base_dir so the next scenario can work
 	  # in case we erred and were left stranded elsewhere
 	  try:
 		os.chdir(world.base_dir)
 	  except:
-		pass  # In some cases, if lettuce didn't get very far, world.basedir is not defined yet.
+		pass  # In some cases, if lettuce didn't get very far, world.base_dir is not defined yet.
 #}}}
 

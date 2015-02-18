@@ -39,9 +39,9 @@ def run_mpas(step, procs, executable):
 
 	if ( world.run == True ):
 		if executable.find("testing") >= 0:
-			rundir = "%s/testing_tests/%s"%(world.basedir, world.test)
+			rundir = "%s/testing_tests/%s"%(world.base_dir, world.test)
 		elif executable.find("trusted") >= 0:
-			rundir = "%s/trusted_tests/%s"%(world.basedir, world.test)
+			rundir = "%s/trusted_tests/%s"%(world.base_dir, world.test)
 
 		os.chdir(rundir)
 		command = "mpirun"
@@ -51,7 +51,7 @@ def run_mpas(step, procs, executable):
 		try:
 			subprocess.check_call([command, arg1, arg2, arg3], stdout=dev_null, stderr=dev_null)  # check_call will throw an error if return code is not 0.
 		except:
-			os.chdir(world.basedir)  # return to basedir before err'ing.
+			os.chdir(world.base_dir)  # return to base_dir before err'ing.
 			raise
 		if os.path.exists('output.nc'):
 			outfile = 'output.nc'
@@ -63,7 +63,7 @@ def run_mpas(step, procs, executable):
 		try:
 			subprocess.check_call([command, arg1, arg2], stdout=dev_null, stderr=dev_null)  # check_call will throw an error if return code is not 0.
 		except:
-			os.chdir(world.basedir)  # return to basedir before err'ing.
+			os.chdir(world.base_dir)  # return to base_dir before err'ing.
 			raise
 		if world.num_runs == 0:
 			world.num_runs = 1
@@ -78,7 +78,7 @@ def run_mpas(step, procs, executable):
 			world.num_runs = 2
 			world.run2 = "%s/%s"%(rundir, arg2)
 			world.run2dir = rundir
-		os.chdir(world.basedir)
+		os.chdir(world.base_dir)
 #}}}
 
 @step('I perform a (\d+) processor MPAS  "([^"]*)" run with restart')#{{{
@@ -86,9 +86,9 @@ def run_mpas_with_restart(step, procs, executable):
 
 	if ( world.run == True ):
 		if executable.find("testing") >= 0:
-			rundir = "%s/testing_tests/%s"%(world.basedir, world.test)
+			rundir = "%s/testing_tests/%s"%(world.base_dir, world.test)
 		elif executable.find("trusted") >= 0:
-			rundir = "%s/trusted_tests/%s"%(world.basedir, world.test)
+			rundir = "%s/trusted_tests/%s"%(world.base_dir, world.test)
 
 		os.chdir(rundir)
 
@@ -149,7 +149,7 @@ def run_mpas_with_restart(step, procs, executable):
 		try:
 			subprocess.check_call([command, arg1, arg2, arg3], stdout=dev_null, stderr=dev_null)  # check_call will throw an error if return code is not 0.
 		except:
-			os.chdir(world.basedir)  # return to basedir before err'ing.
+			os.chdir(world.base_dir)  # return to base_dir before err'ing.
 			raise
 
 		namelistfile = open(world.namelist, 'r+')
@@ -176,7 +176,7 @@ def run_mpas_with_restart(step, procs, executable):
 		try:
 			subprocess.check_call([command, arg1, arg2, arg3], stdout=dev_null, stderr=dev_null)
 		except:
-			os.chdir(world.basedir)  # return to basedir before err'ing.
+			os.chdir(world.base_dir)  # return to base_dir before err'ing.
 			raise
 
 		command = "mv"
@@ -185,7 +185,7 @@ def run_mpas_with_restart(step, procs, executable):
 		try:
 			subprocess.check_call([command, arg1, arg2], stdout=dev_null, stderr=dev_null)
 		except:
-			os.chdir(world.basedir)  # return to basedir before err'ing.
+			os.chdir(world.base_dir)  # return to base_dir before err'ing.
 			raise
 
 		if world.num_runs == 0:
@@ -201,7 +201,7 @@ def run_mpas_with_restart(step, procs, executable):
 			world.num_runs = 2
 			world.run2 = "%s/%s"%(rundir,arg2)
 			world.run2dir = rundir
-		os.chdir(world.basedir)
+		os.chdir(world.base_dir)
 #}}}
 
 @step('I compute the RMS of "([^"]*)"')#{{{
@@ -231,7 +231,7 @@ def compute_rms(step, variable):
 			world.rms_values[variable].append(rms)
 			f1.close()
 			f2.close()
-			os.chdir(world.basedir)
+			os.chdir(world.base_dir)
 		else:
 			print 'Less than two runs. Skipping RMS computation.'
 #}}}
@@ -250,10 +250,10 @@ def clean_test(step):
 	if ( world.run ):
 		command = "rm"
 		arg1 = "-rf"
-		arg2 = "%s/trusted_tests/%s"%(world.basedir,world.test)
+		arg2 = "%s/trusted_tests/%s"%(world.base_dir,world.test)
 		subprocess.call([command, arg1, arg2], stdout=dev_null, stderr=dev_null)
 		command = "rm"
 		arg1 = "-rf"
-		arg2 = "%s/testing_tests/%s"%(world.basedir,world.test)
+		arg2 = "%s/testing_tests/%s"%(world.base_dir,world.test)
 		subprocess.call([command, arg1, arg2], stdout=dev_null, stderr=dev_null)
 #}}}
