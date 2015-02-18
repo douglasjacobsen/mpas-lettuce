@@ -49,22 +49,27 @@ def setup_config(feature):
 		  world.clone = world.configParser.getboolean("lettuce_actions", "clone")
 		else:
 		  world.clone = False
+
 		if world.configParser.has_option("lettuce_actions", "build"):
 		  world.build = world.configParser.getboolean("lettuce_actions", "build")
 		else:
 		  world.build = False
+
 		if world.configParser.has_option("lettuce_actions", "run"):
 		  world.run = world.configParser.getboolean("lettuce_actions", "run")
 		else:
 		  world.run = False
+
 		if world.clone == True:
 		  print 'Lettuce will clone MPAS if needed.'
 		else:
 		  print 'Lettuce will NOT attempt to clone MPAS.'
+
 		if world.build == True:
 		  print 'Lettuce will build MPAS if needed.'
 		else:
 		  print 'Lettuce will NOT attempt to build MPAS.'
+
 		if world.run == True:
 		  print 'Lettuce will run MPAS.'
 		else:
@@ -76,6 +81,7 @@ def setup_config(feature):
 			world.build_flags = world.configParser.get("building", "flags")
 		else:
 			world.build_flags = ""
+
 		world.testing_url = world.configParser.get("testing_repo", "test_cases_url")
 		world.trusted_url = world.configParser.get("trusted_repo", "test_cases_url")
 
@@ -136,6 +142,7 @@ def setup_config(feature):
 					if 'statuscheck' in remotes:
 						# need to delete this remote first
 						subprocess.check_call(['git', 'remote', 'rm', 'statuscheck'], stdout=dev_null, stderr=dev_null)
+
 					subprocess.check_call(['git', 'remote', 'add', 'statuscheck', "%s"%world.configParser.get(testtype+"_repo", "url")], stdout=dev_null, stderr=dev_null)
 					subprocess.check_call(['git', 'fetch', 'statuscheck'], stdout=dev_null, stderr=dev_null)
 					# get the hash of the specified branch
@@ -143,6 +150,7 @@ def setup_config(feature):
 						requested_hash = subprocess.check_output(['git', 'rev-parse', "statuscheck/%s"%world.configParser.get(testtype+"_repo", "branch")], stderr=dev_null)
 					except:
 						requested_hash = world.configParser.get(testtype+"_repo", "branch")  # perhaps they just specified a hash instead of branch name
+
 					if requested_hash == HEAD_hash:
 						print 'Current ' + testtype + ' clone and branch are up to date.'
 						need_to_build = False
@@ -150,6 +158,7 @@ def setup_config(feature):
 						remotes = subprocess.check_output(['git', 'remote'], stderr=dev_null)
 						if 'statuscheck' in remotes:
 							subprocess.check_call(['git', 'remote', 'rm', 'statuscheck'], stdout=dev_null, stderr=dev_null)
+
 					else:
 						print 'Updating ' + testtype + ' HEAD to specified repository and branch.'
 						need_to_build = True
@@ -158,11 +167,14 @@ def setup_config(feature):
 							subprocess.check_call(['git', 'checkout', requested_hash], stdout=dev_null, stderr=dev_null)
 						except:
 							exit("Lettuce encountered an error in trying to git checkout: " + requested_hash)
+
 						remotes = subprocess.check_output(['git', 'remote'], stderr=dev_null)
 						if 'origin' in remotes:
 							subprocess.check_call(['git', 'remote', 'rm', 'origin'], stdout=dev_null, stderr=dev_null)
+
 						if 'statuscheck' in remotes:
 							subprocess.check_call(['git', 'remote', 'rename', 'statuscheck', 'origin'], stdout=dev_null, stderr=dev_null)
+
 						# Clean the build of the core we're trying to build
 						print "   -- Running make clean CORE=%s"%world.configParser.get("building", "core")
 						subprocess.check_call(['make', 'clean', "CORE=%s"%world.configParser.get("building", "core")], stdout=dev_null, stderr=dev_null)
