@@ -149,7 +149,8 @@ def setup_config(feature):
 					try:
 						requested_hash = subprocess.check_output(['git', 'rev-parse', "statuscheck/%s"%world.configParser.get(testtype+"_repo", "branch")], stderr=dev_null)
 					except:
-						requested_hash = world.configParser.get(testtype+"_repo", "branch")  # perhaps they just specified a hash instead of branch name
+						requested_hash = subprocess.check_output(['git', 'rev-parse', "%s"%world.configParser.get(testtype+"_repo", "branch")], stderr=dev_null)  # perhaps they just specified a hash instead of branch name, in which case don't include the remote - but still use rev-parse to get the FULL hash.
+						#print requested_hash, HEAD_hash, '\n'
 
 					if requested_hash == HEAD_hash:
 						print 'Current ' + testtype + ' clone and branch are up to date.'
